@@ -1,0 +1,31 @@
+{
+  "name": "crypto-test",
+  "version": "1.0.0",
+  "description": "generate private key ande public key for encryption, decryption and sign, verify",
+  "main": "index.js",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "eccrypto": "^1.0.3",
+    "secp256k1": "^3.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "example.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/MongoX-SEC/crypto-test.git"
+  },
+  "keywords": [
+    "sec",
+    "blockchain",
+    "crypto",
+    "secwallet"
+  ],
+  "author": "ppg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/MongoX-SEC/crypto-test/issues"
+  },
+  "homepage": "https://gitlab.com/MongoX-SEC/crypto-test#README"
+}

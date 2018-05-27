@@ -1,5 +1,8 @@
+'strict mode'
 const crypto = require('crypto')
 const eccrypto = require('eccrypto')
+
+
 
 /**
  * using EC crypto generate privat key and public key
@@ -10,68 +13,88 @@ const eccrypto = require('eccrypto')
 /**
  * A new random 32-byte private key.
  */
-let privateKey = crypto.randomBytes(32)
+class secCrypto {
+    constructor() {
+        this.privateKey = ''
+        this.publicKey = ''
+        this.testPrivateKey = ''
+        this.testPublicKey = ''
+        this.msg = ''
+        this.generateCryptoPrivKey()
+    }
+    generateCryptoPrivKey() {
+        this.privateKey = crypto.randomBytes(32)
+        this.testPrivateKey = this.privateKey.toString('base64', 0, 32)
+        this.generateCryptoPubKey()
+    }
 
-/**
- * Corresponding uncompressed (65-byte) public key.
- */
+    generateCryptoPubKey() {
+        /**
+         * Corresponding uncompressed (65-byte) public key.
+         */
 
-let publicKey = eccrypto.getPublic(privateKey)
-
-let testPrivateKey = privateKey.toString('base64', 0, 32)
-let testPublicKey = publicKey.toString('base64',0,32)
-console.log('generate Private Key:', testPrivateKey)
-console.log('generate Public Key:', testPublicKey)
-console.log('#####################################################################################################')
-
-let str = 'message to sign'
-/** 
- *Always hash you message to sign!
- */
-let msg = crypto.createHash('sha256').update(str).digest()
-
-
-
-/**
- * testing sign and verify
- */
-eccrypto.sign(privateKey, msg).then(function (sig) {
-
-    console.log('Signature in DER format:', sig)
-    eccrypto.verify(publicKey, msg, sig).then(function () {
-
-        console.log('Signature is OK')
-
-    }).catch(function () {
-
-        console.log('Signature is BAD')
-
-    })
-})
+        this.publicKey = eccrypto.getPublic(this.privateKey)
+        this.testPublicKey = this.publicKey.toString('base64', 0, 32)
+    }
 
 
-/**
-  * testiing encrypto and decrypto
-  */
+    secSign(privateKey, str, callback) {
+
+        this.msg = crypto.createHash('sha256').update(str).digest()
+
+        eccrypto.sign(privateKey, this.msg).then(function (sig) {
 
 
-let cryptoMsg = 'hello world'
-
-/**
- * Encrypting the message with public key for user.
- */
-eccrypto.encrypt(publicKey, Buffer(cryptoMsg)).then(function (encrypted) {
-
-    console.log('#####################################################################################################')
-    console.log('cipher to part user:', encrypted)
-
-    /**
-     * user decrypting the message with privat key.
-     */
-    eccrypto.decrypt(privateKey, encrypted).then(function (plaintext) {
-        console.log('Message to part user:', plaintext.toString())
-    })
-})
+            let secSign = sig
+            callback(secSign)
 
 
+        })
 
+    }
+
+    secVerify(publicKey, sig) {
+        eccrypto.verify(publicKey, this.msg, sig).then(function () {
+
+            console.log('Signature is OK')
+
+        }).catch(function () {
+
+            console.log('Signature is BAD')
+
+        })
+    }
+    secEncrypt(publicKey, cryptoMsg, callback) {
+
+        eccrypto.encrypt(publicKey, Buffer(cryptoMsg)).then(function (encrypted) {
+
+
+            let secCipher = encrypted
+            // console.log('cipher to part user (string)', testCryptoMsg)
+            /**
+             * user decrypting the message with privat key.
+             */
+            callback(secCipher)
+
+        })
+    }
+    secDecrypt(privateKey, encrypted, callback) {
+        eccrypto.decrypt(privateKey, encrypted).then(function (plaintext) {
+
+            let secPlaintext = plaintext
+
+            callback(secPlaintext)
+        })
+    }
+
+    getCryptoPrivKey() {
+        return this.privateKey
+    }
+
+    getCryptoPubKey() {
+        return this.publicKey
+    }
+
+}
+
+module.exports = secCrypto

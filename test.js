@@ -1,5 +1,5 @@
-const secCrypto = require('./eccrypto_test')
-const crypto = require('crypto')
+const secCrypto = require('./secCrypto_lib')
+
 
 let TestSecCrypto = new secCrypto()
 
@@ -37,11 +37,11 @@ TestSecCrypto.secSign(privateKey,str,(sig)=>{
 
 
 let text = 'Hello World'
-let testCipher = TestSecCrypto.secEncrypt(publicKey,text,(cipher)=>{
+TestSecCrypto.secEncrypt(publicKey,text,(cipher)=>{
 
     console.log('cipher:',cipher)
 
-    let testPlaintext = TestSecCrypto.secDecrypt(privateKey,cipher,(plaintext)=>{
+    TestSecCrypto.secDecrypt(privateKey,cipher,(plaintext)=>{
         console.log('Plaintext:', plaintext)
 
         let strPlaintext = plaintext.toString()

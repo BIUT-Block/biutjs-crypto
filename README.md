@@ -4,19 +4,20 @@
 ## SecCrypto
 **kind**: global calss
 
-*[SecCrpto](#SecCrpto)
-    *[new SecCrypto](#SecCrypto)
-    *[.getCryptoPrivKey()] ⇒ <code>Array.&lt;Buffer&gt;</code> or <code>String</code>
-    *[.getCryptoPubKey()] ⇒ <code>Array.&lt;Buffer&gt;</code> or <code>String</code>
-    *[.secSign(privateKey, str, callback)] ⇒ <code>Array.&lt;Buffer&gt;</code>
-    *[.secVerify(publicKey, sig)] ⇒ <code>Array.&lt;Buffer&gt;</code>
-    *[.secEncrypt(publicKey,cryptoMsg, callback)]  ⇒ <code>Array.&lt;Buffer&gt;</code>
-    *[.secDecrypt(privateKey, encrypted, callback)]  ⇒ <code>Array.&lt;String&gt;</code>
+* [SecCrpto](#SecCrpto)
+    * [new SecCrypto()](#SecCrypto)
+    * [.getCryptoPrivKey()](#SecCrpto+getCryptoPrivKey) ⇒ <code>Array.&lt;Buffer&gt;</code> or <code>String</code>
+    * [.getCryptoPubKey()](#SecCrpto+getCryptoPubKey) ⇒ <code>Array.&lt;Buffer&gt;</code> or <code>String</code>
+    * [.secSign(privateKey, str, callback)](#SecCrpto+secSign) ⇒ <code>Array.&lt;Buffer&gt;</code>
+    * [.secVerify(publicKey, sig)](#SecCrpto+secVerify) ⇒ <code>Array.&lt;Buffer&gt;</code>
+    * [.secEncrypt(publicKey,cryptoMsg, callback)](#SecCrpto+secEncrypt)  ⇒ <code>Array.&lt;Buffer&gt;</code>
+    * [.secDecrypt(privateKey, encrypted, callback)](#SecCrpto+getDecrypt)  ⇒ <code>Array.&lt;String&gt;</code>
+
 
 * * *
 ## Motivation
 
-SecCrypto is used for SEC Blockchain. It could crypt, decrypt, signature and verify information and users identify. There is some support from npm 'eccrypto'.
+SecCrypto is used for SEC Blockchain. It could crypt, decrypt, signature and verify information and users identify. There is some support from npm `eccrypto`.
 
 #Implementation details
 

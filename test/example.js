@@ -1,12 +1,9 @@
-const secCrypto = require('../secCrypto_lib')
+const SecCrypto = require('../secCrypto_lib')
 
+let TestSecCrypto = new SecCrypto()
 
-let TestSecCrypto = new secCrypto()
-
-
-
-console.log(`generate Private Key: ${ TestSecCrypto.getCryptoPrivKey()}`)
-console.log(`generate Public Key: ${ TestSecCrypto.getCryptoPubKey()}`)
+console.log(`generate Private Key: ${TestSecCrypto.getCryptoPrivKey()}`)
+console.log(`generate Public Key: ${TestSecCrypto.getCryptoPubKey()}`)
 console.log('#####################################################################################################')
 
 let privateKey = TestSecCrypto.getCryptoPrivKey()
@@ -19,37 +16,27 @@ console.log('generate Private Key:', strPrivKey)
 console.log('generate Public Key:', strPubKey)
 console.log('#####################################################################################################')
 
-
 let str = 'message to sign'
-/** 
+/**
  *Always hash you message to sign!
  */
-TestSecCrypto.secSign(privateKey,str,(sig)=>{
-    console.log('Signature in DER format:', sig)
+TestSecCrypto.secSign(privateKey, str, (sig) => {
+  console.log('Signature in DER format:', sig)
 
-    TestSecCrypto.secVerify(publicKey,sig)
+  TestSecCrypto.secVerify(publicKey, sig)
 
-
-    console.log('#####################################################################################################')
-
-
+  console.log('#####################################################################################################')
 })
-
 
 let text = 'Hello World'
-TestSecCrypto.secEncrypt(publicKey,text,(cipher)=>{
 
-    console.log('cipher:',cipher)
+TestSecCrypto.secEncrypt(publicKey, text, (cipher) => {
+  console.log('cipher:', cipher)
 
-    TestSecCrypto.secDecrypt(privateKey,cipher,(plaintext)=>{
-        console.log('Plaintext:', plaintext)
+  TestSecCrypto.secDecrypt(privateKey, cipher, (plaintext) => {
+    console.log('Plaintext:', plaintext)
 
-        let strPlaintext = plaintext.toString()
-        console.log('Plaintext to String:', strPlaintext)
-    })
-    
+    let strPlaintext = plaintext.toString()
+    console.log('Plaintext to String:', strPlaintext)
+  })
 })
-
-
-
-

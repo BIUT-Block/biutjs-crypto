@@ -6,37 +6,49 @@ const eccrypto = require('eccrypto')
 
 /**
  * using EC crypto generate privat key and public key
- * testing sign and verify
+ * it also can be used for user authentication
+ * class secCrypto could encrypt and decrypt message
  */
 
 
-/**
- * A new random 32-byte private key.
- */
+
 class secCrypto {
     constructor() {
         this.privateKey = ''
         this.publicKey = ''
-        this.testPrivateKey = ''
-        this.testPublicKey = ''
+        this.strPrivateKey = ''
+        this.strPublicKey = ''
         this.msg = ''
         this.generateCryptoPrivKey()
     }
+
+
+    /**
+     * A new random 32-byte private key.
+     */
+
     generateCryptoPrivKey() {
+
         this.privateKey = crypto.randomBytes(32)
-        this.testPrivateKey = this.privateKey.toString('base64', 0, 32)
+        this.strPrivateKey = this.privateKey.toString('base64', 0, 32)
         this.generateCryptoPubKey()
     }
 
+    /**
+     * Corresponding uncompressed (65-byte) public key.
+     */
+
     generateCryptoPubKey() {
-        /**
-         * Corresponding uncompressed (65-byte) public key.
-         */
 
         this.publicKey = eccrypto.getPublic(this.privateKey)
-        this.testPublicKey = this.publicKey.toString('base64', 0, 32)
+        this.strPublicKey = this.publicKey.toString('base64', 0, 65)
     }
 
+    /**
+     * using private key signature message
+     * input private key and message by string
+     * message will be translated and saved in buffer
+     */
 
     secSign(privateKey, str, callback) {
 
@@ -50,8 +62,14 @@ class secCrypto {
 
 
         })
-
     }
+
+    /**
+     * using public key decryption
+     * @param {*} publicKey inputed as buffer else as string
+     * @param {*} sig is from secSign() cipher
+     * verify user privat key and identity
+     */
 
     secVerify(publicKey, sig) {
         eccrypto.verify(publicKey, this.msg, sig).then(function () {
@@ -64,20 +82,31 @@ class secCrypto {
 
         })
     }
+
+    /**
+     * user decrypting the message with privat key.
+     */
+
     secEncrypt(publicKey, cryptoMsg, callback) {
 
         eccrypto.encrypt(publicKey, Buffer(cryptoMsg)).then(function (encrypted) {
 
 
             let secCipher = encrypted
-            // console.log('cipher to part user (string)', testCryptoMsg)
-            /**
-             * user decrypting the message with privat key.
-             */
+
+
             callback(secCipher)
 
         })
     }
+
+    /**
+     * using private key decrypt cipher
+     * @param {Buffer} privateKey 
+     * @param {Buffer} encrypted 
+     * @param {string} callback 
+     */
+    
     secDecrypt(privateKey, encrypted, callback) {
         eccrypto.decrypt(privateKey, encrypted).then(function (plaintext) {
 
@@ -87,9 +116,11 @@ class secCrypto {
         })
     }
 
+
     getCryptoPrivKey() {
         return this.privateKey
     }
+
 
     getCryptoPubKey() {
         return this.publicKey

@@ -1,4 +1,4 @@
-const secCrypto = require('./secCrypto_lib')
+const secCrypto = require('../secCrypto_lib')
 
 
 let TestSecCrypto = new secCrypto()

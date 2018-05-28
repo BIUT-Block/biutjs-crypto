@@ -1,5 +1,5 @@
 {
-  "name": "crypto-test",
+  "name": "@sec-block/secjs-crypto",
   "version": "1.0.0",
   "description": "generate private key ande public key for encryption, decryption and sign, verify",
   "main": "index.js",

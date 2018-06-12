@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@gitlab.com/MongoX-SEC/crypto-test.git"
+    "url": "https://github.com/SEC-Block/secjs-crypto"
   },
   "keywords": [
     "sec",

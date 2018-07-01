@@ -2,4 +2,3 @@ node_modules
 .eslintrc.js
 out
 .DS_Store
-package-lock.json

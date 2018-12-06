@@ -1,114 +1,98 @@
-'strict mode'
-const crypto = require('crypto')
-const eccrypto = require('eccrypto')
+const ECIES = require('./bitcore-ecies/ecies')
+const sha3S256 = require('js-sha3').sha3_256
 
-/**
- * using EC crypto generate privat key and public key
- * it also can be used for user authentication
- * class secCrypto could encrypt and decrypt message
- */
+const OccUtil = require('@sec-block/secjs-util')
+const randombytes = require('randombytes')
+const secp256k1 = require('secp256k1')
+const bitcore = require('bitcore-lib')
 
-class secCrypto {
-  constructor () {
-    this.privateKey = ''
-    this.publicKey = ''
-    this.strPrivateKey = ''
-    this.strPublicKey = ''
-    this.msg = ''
-    this.generateCryptoPrivKey()
+const _decryptWithPrivateKeyEciesMap = new Map()
+const _encryptWithPublicKeyEciesCache = new Map()
+// this key is used as false sample, because bitcore would crash when alice has no privateKey
+const _encryptWithPublicKeyDefaultKey = new bitcore.PrivateKey('52435b1ff21b894da15d87399011841d5edec2de4552fdc29c8299574436925d')
+
+class SecKey {
+  constructor () { }
+  _ensureBuffer (bufferOrString) {
+    // make sure its a buffers
+    if (typeof bufferOrString === 'string')
+      return Buffer.from(bufferOrString, 'hex')
+    else
+      return bufferOrString
+  }
+  _formatAddress (addr) {
+    // if (addr.substr(0, 2) == '0x' && format == 'raw') {
+    //   addr = addr.substr(2);
+    // }
+    const format = 'hex'
+    if (addr.substr(0, 2) !== '0x' && format === 'hex')
+      addr = '0x' + addr
+
+    return addr
+  }
+  createPrivateKey () {
+    let privateKey = Buffer.from(randombytes(32), 'hex').toString('hex')
+    return privateKey
   }
 
-  /**
-   * A new random 32-byte private key.
-   */
-  /**
-   */
-  generateCryptoPrivKey () {
-    this.privateKey = crypto.randomBytes(32)
-    this.strPrivateKey = this.privateKey.toString('base64', 0, 32)
-    this.generateCryptoPubKey()
+  publicKeyFromPrivateKey (privateKey) {
+    let publicKey = secp256k1.publicKeyCreate(this._ensureBuffer(privateKey)).toString('hex')
+    return publicKey
   }
 
-  /**
-   * Corresponding uncompressed (65-byte) public key.
-   */
-
-  generateCryptoPubKey () {
-    this.publicKey = eccrypto.getPublic(this.privateKey)
-    this.strPublicKey = this.publicKey.toString('base64', 0, 65)
+  publicKeyToAddress (publicKey) {
+    publicKey = secp256k1.publicKeyConvert(this._ensureBuffer(publicKey), false).slice(1)
+    return this._formatAddress(OccUtil.publicToAddress(publicKey).toString('hex'))
   }
 
-  /**
-   * @param  {Buffer} privateKey -using private key signature message
-   * @param  {string} str -input private key and message by string
-   * @param  {Buffer} callback -message will be translated and saved in buffer
-   */
-
-  secSign (privateKey, str, callback) {
-    this.msg = crypto.createHash('sha256').update(str).digest()
-
-    eccrypto.sign(privateKey, this.msg).then(function (sig) {
-      let secSign = sig
-      callback(secSign)
-    })
+  hash (message) {
+    return sha3S256(message)
   }
 
-  /**
-   * sig is from secSign() cipher
-   * verify user privat key and identity
-   * @param  {Buffer} publicKey -input public key and using public key decryption signature
-   * @param  {Buffer} sig -decrypt signature and verify identify
-   */
-
-  secVerify (publicKey, sig) {
-    eccrypto.verify(publicKey, this.msg, sig).then(function () {
-      console.log('Signature is OK')
-    }).catch(function () {
-      console.log('Signature is BAD')
-    })
+  signHash (privateKey, hash) {
+    let sigObj = secp256k1.sign(
+      this._ensureBuffer(hash),
+      this._ensureBuffer(privateKey)
+    )
+    return sigObj.signature.toString('hex')
   }
 
-  /**
-   * user decrypting the message with privat key.
-   * @param  {Buffer} publicKey -input public key and use public key encrypt message
-   * @param  {string} cryptoMsg -input message
-   * @param  {Buffer} callback  -callback cipher
-   */
-  secEncrypt (publicKey, cryptoMsg, callback) {
-    eccrypto.encrypt(publicKey, Buffer.from(cryptoMsg)).then(function (encrypted) {
-      let secCipher = encrypted
-      callback(secCipher)
-    })
+  verifyHashSignature (publicKey, hash, signature) {
+    return secp256k1.verify(
+      this._ensureBuffer(hash),
+      this._ensureBuffer(signature),
+      this._ensureBuffer(publicKey)
+    )
   }
-
-  /**
-   * using private key decrypt cipher
-   * @param {Buffer} privateKey -input private key and use private key decrypt cipher
-   * @param {Buffer} encrypted -input cipher
-   * @param {string} callback -callback plaintext
-   */
-
-  secDecrypt (privateKey, encrypted, callback) {
-    eccrypto.decrypt(privateKey, encrypted).then(function (plaintext) {
-      let secPlaintext = plaintext
-
-      callback(secPlaintext)
-    })
+  encryptWithPublicKey (publicKey, message) {
+    if (!_encryptWithPublicKeyEciesCache.has(publicKey)) {
+      let alice = ECIES()
+        .privateKey(_encryptWithPublicKeyDefaultKey)
+        .publicKey(new bitcore.PublicKey(publicKey))
+      _encryptWithPublicKeyEciesCache.set(
+        publicKey,
+        alice
+      )
+    }
+    let alice = _encryptWithPublicKeyEciesCache.get(publicKey)
+    let encrypted = alice.encrypt(message)
+    let ret = encrypted.toString('hex')
+    return ret
   }
+  decryptWithPrivateKey (privateKey, encrypted) {
+    // caching
+    if (!_decryptWithPrivateKeyEciesMap.has(privateKey)) {
+      let privKey = new bitcore.PrivateKey(privateKey)
+      let alice = ECIES().privateKey(privKey)
+      _decryptWithPrivateKeyEciesMap.set(privateKey, alice)
+    }
 
-  /**
-   * return private key
-   */
-  getCryptoPrivKey () {
-    return this.privateKey
-  }
-
-  /**
-   * return public key
-   */
-  getCryptoPubKey () {
-    return this.publicKey
+    let alice = _decryptWithPrivateKeyEciesMap.get(privateKey)
+    let decryptMe = Buffer.from(encrypted, 'hex')
+    let decrypted = alice.decrypt(decryptMe)
+    let ret = decrypted.toString()
+    return ret
   }
 }
-
-module.exports = secCrypto
+let _secKey = new SecKey()
+module.exports = _secKey

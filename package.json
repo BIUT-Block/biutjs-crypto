@@ -1,6 +1,6 @@
 {
   "name": "@sec-block/secjs-crypto",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "generate private key ande public key for encryption, decryption and sign, verify",
   "main": "index.js",
   "dependencies": {
